@@ -1,6 +1,7 @@
 import requests
 import pytest
 from lib.base_case import BaseCase
+from lib.assertions import Assertions
 
 
 class TestUserAuth(BaseCase):
@@ -29,11 +30,12 @@ class TestUserAuth(BaseCase):
             }
         )
 
-        assert "user_id" in response2.json(), "Нет поля user_id"
-
-        user_id_from_check_method = response2.json().get('user_id')
-
-        assert self.user_id_from_auth_method == user_id_from_check_method, "Поля user_id не совпадают"
+        Assertions.assert_json_value_by_name(
+            response2,
+            'user_id',
+            self.user_id_from_auth_method,
+            "User id from auth method is not equal to user id from auth check method"
+        )
 
     @pytest.mark.parametrize("condition", exclude_params)
     def test_negative_auth_check(self, condition):
@@ -52,8 +54,9 @@ class TestUserAuth(BaseCase):
                 }
             )
 
-        assert "user_id" in self.response1.json(), "Нет поля user_id"
-
-        user_id_from_check_method = response2.json().get('user_id')
-
-        assert user_id_from_check_method == 0, f"User is authenticated, but should not be condition: {condition}"
+        Assertions.assert_json_value_by_name(
+            response2,
+            'user_id',
+            0,
+            f"User is authenticated, but should not be condition: {condition}"
+        )
